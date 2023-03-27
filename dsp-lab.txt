@@ -1,0 +1,889 @@
+MAC:
+unsigned char data[15][15]={ {1,2}, {2,4}, {3,4}, {4,6},{5,8},
+{1,2},{2,3}, {3,5},{4,7},{5,6} };
+unsigned int MAC_result = 0;
+
+unsigned int multiply_accum()
+{
+int i=0;
+unsigned int mac_result = 0;
+
+for(i=0;i<10;i++)
+{
+mac_result+=(data[i][0]*data[i][1]);
+}
+return(mac_result);
+}
+int main(void)
+{
+MAC_result=multiply_accum(); printf("%d",MAC_result);
+}
+
+LINEAR CONVOLUTION:
+
+#define X1 4
+#define X2 4
+float X[20] = {1,2,3,4},Y[20] = {1,2,3,4}, lc[40];
+unsigned int i, n; void main(void)
+{
+for (n=0; n<((X1+X2)-1); n++)
+{
+for(i=0; i<=n; i++)
+{
+lc[n] = lc[n] + (X[i]*Y[n-i]);
+}
+}
+while(1);
+}
+
+CIRCULAR CONVOLUTION:
+
+int in1[4]={4,3,2,1}, in2[4]={1,2,3,4}, out[4], temp[10], i,
+sum=0, j;
+void rot(int *x); void main()
+{
+for(i=0;i<4;i++)
+{
+if(i == 1) temp[i+2] =in1[i];
+
+else if(i==3) temp[1-2]=in1[i];
+
+else
+temp[i] =in1[i];
+
+}
+for(i=0;i<4;i++)
+{
+sum = 0;
+
+for(j=0;j<4;j++)
+{
+sum+=(in2[j]*temp[j]);
+}
+out[i] = sum; rot(temp);
+}
+while(1);
+}
+
+void rot(int *x)
+{
+int t;
+t = x[0]; x[0] = x[3];
+x[3] = x[2];
+x[2] = x[1]; x[1] = t;
+}
+
+SORTING:
+
+ASC:
+
+int a[10]={1,4,2,3,5,6,11,7,8,9};
+int i,j, temp =0; int main()
+{
+for(i=0;i<10;i++)
+{
+for(j=i+1;j<10;j++)
+{
+if(a[i]>a[j])
+{
+temp=a[i]; a[i]=a[j]; a[j]=temp;
+}
+}
+
+DSC:
+
+int a[10]={1,4,2,3,5,6,11,7,8,9};
+int i,j, temp =0; int main()
+{
+for(i=0;i<10;i++)
+{
+for(j=i+1;j<10;j++)
+{
+if(a[i]<a[j])
+{
+temp=a[i]; a[i]=a[j]; a[j]=temp;
+}
+}
+
+OVERLAP ADD:
+
+clc; clear all; close all;
+% Overlap Add method x=input('x[n]=');
+h=input('h[n]=');
+L=input('L='); N1=length(x); M=length(h); lc=conv(x,h);
+x=[x zeros(1,mod(-N1,L))]; N2=length(x);
+h=[h zeros(1,L-1)];
+H=fft(h,L+M-1); S=N2/L;
+index=1:L; X=[zeros(M-1)]; for stage=1:S
+xm=[x(index) zeros(1,M-1)]; % Selecting sequence process X1=fft(xm,L+M-1);
+Y=X1.*H;
+Y=ifft(Y);
+%Samples Added in every stage Z=X((length(X)-M+2):length(X))+Y(1:M-1);
+X=[X(1:(stage-1)*L) Z Y(M:M+L-1)];
+index=stage*L+1:(stage+1)*L; end
+i=1:N1+M-1; X=X(i);
+% Similarity b/w Inbuilt and Calculated one similarity=corrcoef(X,lc) figure subplot(2,2,1); stem(x,'linewidth',2); title('Input');
+xlabel('n'); ylabel('x[n]'); grid on;
+subplot(2,2,2); stem(h,'linewidth',2);
+title('Input'); xlabel('n'); ylabel('h[n]'); grid on; subplot(2,2,4); stem(lc,'linewidth',2); title('Convolution Using conv() function'); xlabel('n'); ylabel('y[n]'); grid on; subplot(2,2,3); grid on;
+stem(X,'linewidth',2);
+title('Convolution Using Overlap Add Method'); xlabel('n'); ylabel('y[n]'); grid on; disp('y[n]='); disp(X);
+
+OVERLAP SAVE:
+clc; clear all; close all;
+% Overlap Save method x=input('x[n]=');
+h=input('h[n]=');
+L=input('L='); N1=length(x); M=length(h); lc=conv(x,h);
+x=[x zeros(1,mod(-N1,L)) zeros(1,L)]; N2=length(x);
+h=[h zeros(1,L-1)];
+H=fft(h,L+M-1); S=N2/L;
+index=1:L;
+xm=x(index); % For first stage Special Case x1=[zeros(1,M-1) xm]; %zeros appeded at Start point X=[];
+for stage=1:S X1=fft(x1,L+M-1); Y=X1.*H;
+Y=ifft(Y); index2=M:M+L-1;
+Y=Y(index2); %Discarding Samples X=[X Y];
+% Selecting Sequence to process index3=(((stage)*L)-M+2):((stage+1)*L); if(index3(L+M-1)<=N2)
+x1=x(index3); end
+end; i=1:N1+M-1; X=X(i);
+similarity=corrcoef(X,lc) % Similarity between Inbuilt and Calculated conv figure
+subplot(2,2,1);
+stem(x,'linewidth',2);
+title('Input');
+xlabel('n');
+ylabel('x[n]'); grid
+on; subplot(2,2,2);
+stem(h,'linewidth',2);
+title('Input');
+xlabel('n');
+ylabel('h[n]');
+
+grid on; subplot(2,2,4);
+stem(lc,'linewidth',2);
+title('Convolution Using conv() function'); xlabel('n'); ylabel('y[n]'); grid on;
+subplot(2,2,3); stem(X,'linewidth',2); title('Convolution Using Overlap Save Method') xlabel('n'); ylabel('y[n]'); grid on; disp('y[n]='); disp(X);
+
+DFT:
+
+clc; clear all; close all;
+N=input('no of sample values: ');%4 POINT DFT x=input('enter the input sequence in square bracket: '); L=length(x); X=[];
+subplot(221) stem(x); title('input sequence');
+%dft
+if((L-N)<0)
+x=[x,zeros(1,(L-N))]; else
+x=x; end i=1;
+j=sqrt(-1); for k=0:1:N-1 m=1;
+a=0;
+for n=0:1:N-1
+a=x(m)*exp((-1*j*2*pi*n*k)/N)+a; m=m+1;
+end X(i)= a;
+i=i+1; end
+subplot(222);
+stem(angle(X)) title('X(k)-PHASE'); subplot(223);
+stem(abs(X)) title('X(K)-MAGNITUDE');
+
+IDFT:
+N=input('No of samples=');
+X=input('Type the given sequence in square bracket='); R=[];
+i=1;
+j=sqrt(-1); for k=0:1:N-1 m=1;
+a=0;
+for n=0:1:N-1 a=X(m).*exp((j*2*pi*n*k)/N)+a; m=m+1;
+end
+R(i)= a/N; i=i+1; end
+stem(abs(R)); title('IDFT-x(n)');
+
+DIT-FFT:
+clc; clear all; close all;
+x=input('Enter the sequence:'); n=input('Enter number of points: '); l=length(x);
+x1=[];
+if(l<n)
+x1=[x,zeros(1,n-l)]; %padding extra zeros else
+x1=x; end y=[];
+y=bitrevorder(x1);%bitreverse order N=log2(n);%calculating the number of stages
+%w=exp((-1*j*2*pi)/n); for m=1:N
+d=2^m;
+for l=1:d:n-d+1 for k=0:(d/2)-1
+w=exp(-1i*2*pi*k/d); z1=y(l+k); z2=y(l+k+d/2); y(l+k)=z1+w*z2; y(l+k+d/2)=z1-w*z2; end
+end
+
+end subplot(2,2,1); stem(x1);
+title('Input sequence'); disp(y)
+subplot(2,2,2);
+stem(abs(y)); title('Magnitude of dft'); subplot(2,2,3);
+stem(angle(y)); title('Phase of dft'); z1=0;
+z2=0;
+r=bitrevorder(conj(y)); for m=1:N
+d=2^m;
+for l=1:d:n-d+1 for k=0:(d/2)-1
+w=exp(-1*i*2*pi*k/d); z1=r(l+k); z2=r(l+k+d/2); r(l+k)=z1+w*z2; r(l+k+d/2)=z1-w*z2; end
+ end end
+s=conj(r); for m=1:n s(m)=s(m)/n; end
+subplot(2,2,4); stem(s);
+title('Idft')
+
+DIF-FFT:
+clc; clear all; close all;
+x=input('Enter the input sequence :'); n=input('Enter the number of points: '); subplot(2,2,1);
+stem(x);
+title('Input sequence: x[n] '); l=length(x);
+y=[];
+if(l<n)
+y=[x,zeros(1,n-l)]; %padding extra zeros else
+y=x; end
+N=log2(n); for m=N:-1:1
+d=2^m;
+for l=1:d:n-d+1 for k=0:(d/2)-1
+w=exp(-1i*2*pi*k/d); z1=y(l+k); z2=y(l+k+d/2); y(l+k)=z1+z2; y(l+k+d/2)=(z1-z2)*w; end
+ end end X=[];
+X=bitrevorder(y);%x(k) disp(X) subplot(2,2,2);
+stem(abs(X)); title('Magnitude:dif X[k] '); subplot(2,2,3);
+stem(angle(X)); title('Phase: dif X[k] '); r=conj(X);
+for m=N:-1:1 d=2^m;
+for l=1:d:n-d+1
+
+for k=0:(d/2)-1 w=exp(-1i*2*pi*k/d); z1=r(l+k); z2=r(l+k+d/2);
+
+r(l+k)=z1+z2; r(l+k+d/2)=(z1-z2)*w; end
+ end end
+s=conj(r); for m=1:n s(m)=s(m)/n; end
+s=bitrevorder(s); subplot(2,2,4);
+stem(abs(s)); title('DIF_IDFT: X[k] ');
+
+IIR LOW PASS FILTER DESIGN:
+clc; clear all; close all;
+c=input('enter your choice\n 1.inputs in hz, 2.analog in rad/s ,3 digital in radian/sample: ');
+kp=input('enter the pass band ripple in db : '); ks=input('enter the stop band ripple in db : '); if(c==1)
+fp=input('enter the pass band frequency ; '); fs=input('enter the stop band frequency : '); sf=input('enter the sampling frequency : ') wp=(2*pi*fp)/sf;
+ ws=(2*pi*fs)/sf; elseif(c==2)
+fp=input('enter the pass band frequency ; '); fs=input('enter the stop band frequency : '); sf=input('enter the sampling frequency : ') wp=(fp)/sf;
+ ws=(fs)/sf; else
+wp=input('enter the pass band digital frequency ; '); ws=input('enter the stop band digital frequency : ');
+end
+disp('the digital frequency wp is'); disp(wp);
+disp('the digital frequency ws is'); disp(ws);
+%step1 prewarping ap=2*tan(wp/2); as=2*tan(ws/2);
+disp('the prewarped frequency wp is'); disp(ap);
+disp('the prewarped frequency ws is'); disp(as);
+%step 2 converting analog lpf to prototype analog low pass filter
+wp1=1; ws1=as/ap;
+disp('the normalised frequency wp''''is'); disp(wp1);
+disp('the normalised frequency ws'''' is'); disp(ws1);
+%step3 finding the order of the filter a=10^(-kp/10);
+b=10^(-ks/10);
+N=(log10((a-1)/(b-1)))/(2*log10(1/ws1));
+
+N=ceil(abs(N));
+disp('the order of the filter is : '); disp(N);
+%STEP 4 calculating the cutoff frequency wcp=ap/((a-1)^(1/(2*N)));
+wcs=ap/((b-1)^(1/(2*N)));
+disp('the cutoff frequency is wcp: '); disp(wcp);
+disp('the cutoff frequency is wcs: '); disp(wcs);
+%step 5 choosing butterworth polynomial
+ch=input('enter 1 for favourable to pass band and enter 2 for favourable to stop band ":');
+if(ch==1) [num,den]=butter(N,wcp,'s');
+else [num,den]=butter(N,wcs,'s');
+end
+%step 6 finding the transfer function H=tf(num,den);
+disp('the transfer function is'); disp(H);
+%BILINEAR TRANSFORMATION
+[numz,denz]=bilinear(num,den,1);
+disp('The transfer function of the digital butterworth filter')
+hz=tf(numz,denz,-1);
+disp('tf after bilinear transformation'); disp(hz);
+t=0:0.01:pi;
+freqz(numz,denz,t);
+title('IIR Butterworth Low Pass Filter using Bilinear Transformation');
+axis([0 1 -30 1]);
+%Finding and Plotting the poles and zeros of H(Z) disp('Poles and zeros of the digital filter') zeros_of_Digital_Filter=roots(numz); poles_of_Digital_Filter=roots(denz);
+figure; pzplot(hz);
+%To check whether the specifications are met
+disp('The passband and stopband of the designed digital filter')
+t=[wp ws]; h=freqz(numz,denz,t); gain=20*log10(abs(h)); disp(gain);
+
+IIR HIGH PASS FILTER DESIGN:
+clc; clear all; close all;
+c=input('enter your choice\n 1.inputs in hz, 2.analog in rad/s ,3 digital in radian/sample ');
+kp=input('enter the pass band ripple in db : '); ks=input('enter the stop band ripple in db : '); if(c==1)
+fp=input('enter the pass band frequency ; '); fs=input('enter the stop band frequency : '); sf=input('enter the sampling frequency : ') wp=(2*pi*fp)/sf;
+ ws=(2*pi*fs)/sf; elseif(c==2)
+fp=input('enter the pass band frequency ; '); fs=input('enter the stop band frequency : '); sf=input('enter the sampling frequency : ') wp=(fp)/sf;
+ ws=(fs)/sf; else
+ wp=input('enter the pass band digital frequency ; '); ws=input('enter the stop band digital frequency : '); end
+disp('the digital frequency wp is'); disp(wp);
+disp('the digital frequency ws is'); disp(ws);
+%step1 prewarping ap=2*tan(wp/2); as=2*tan(ws/2);
+disp('the prewarped frequency wp is'); disp(ap);
+disp('the prewarped frequency ws is'); disp(as);
+%step 2 converting analog lpf to prototype analog low pass filter
+wp1=1; ws1=as/ap;
+disp('the normalised frequency wp''''is'); disp(wp1);
+disp('the normalised frequency ws'''' is'); disp(ws1);
+%step3 finding the order of the filter a=10^(-kp/10);
+b=10^(-ks/10);
+N=(log10((a-1)/(b-1)))/(2*log10(1/ws1)); N=ceil(abs(N));
+
+disp('the order of the filter is : '); disp(N);
+%STEP 4 calculating the cutoff frequency wcp=ap/((a-1)^(1/(2*N)));
+wcs=ap/((b-1)^(1/(2*N)));
+disp('the cutoff frequency is wcp: '); disp(wcp);
+disp('the cutoff frequency is wcs: '); disp(wcs);
+%step 5 choosing butterworth polynomial
+ch=input('enter 1 for favourable to pass band and enter 2 for favourable to stop band ":');
+if(ch==1) [num,den]=butter(N,wcp,'high','s'); else [num,den]=butter(N,wcs,'high','s'); end
+%step 6 finding the transfer function H=tf(num,den);
+disp('the transfer function is'); disp(H);
+%BILINEAR TRANSFORMATION
+[numz,denz]=bilinear(num,den,1);
+disp('The transfer function of the digital butterworth filter') hz=tf(numz,denz,-1);
+disp('tf after bilinear transformation'); disp(hz);
+t=0:0.01:pi;
+freqz(numz,denz,t);
+title('IIR Butterworth high Pass Filter using Bilinear Transformation');
+axis([0 1 -30 1]);
+%Finding and Plotting the poles and zeros of H(Z) disp('Poles and zeros of the digital filter') zeros_of_Digital_Filter=roots(numz); poles_of_Digital_Filter=roots(denz);
+figure; pzplot(hz);
+%To check whether the specifications are met
+disp('The passband and stopband of the designed digital filter')
+t=[wp ws]; h=freqz(numz,denz,t); gain=20*log10(abs(h)); disp('GAIN'); disp(gain);
+
+IIR BANDPASS FILTER:
+clc; clear all; close all;
+c=input('enter your choice\n 1.inputs in hz, 2.analog in rad/s ,3 digital in radian/sample ');
+kp=input('enter the pass band ripple in db : '); ks=input('enter the stop band ripple in db : '); if(c==1)
+f1=input('enter the f1 value'); f2=input('enter the f2 value');
+fl=input('enter the lower limit frequency fl ; '); fu=input('enter the upper limit frequency fu : '); sf=input('enter the sampling frequency : '); w1=(2*pi*f1)/sf;
+ w2=(2*pi*f2)/sf; wl=(2*pi*fl)/sf; wu=(2*pi*fu)/sf; elseif(c==2)
+f1=input('enter the f1 value'); f2=input('enter the f2 value'); fl=input('enter fl ; '); fu=input('enter fu: ');
+sf=input('enter the sampling frequency : '); w1=(f1)/sf;
+ w2=(f2)/sf; wl=(fl)/sf; wu=(fu)/sf; else
+ w1=input('enter the w1 value'); w2=input('enter the w2 value'); wl=input('enter the wl value; '); wu=input('enter the wu value: '); end
+disp('the digital frequency wl is'); disp(wl);
+disp('the digital frequency wu is'); disp(wu);
+disp('the digital frequency w1 is'); disp(w1);
+disp('the digital frequency w2 is'); disp(w2);
+%step1 prewarping a1=2*tan(w1/2); a2=2*tan(w2/2);
+disp('the prewarped frequency w1 is'); disp(a1);
+disp('the prewarped frequency w2 is'); disp(a2);
+al=2*tan(wl/2); au=2*tan(wu/2);
+disp('the prewarped frequency wl is');
+
+disp(al);
+disp('the prewarped frequency wu is'); disp(au);
+%step 2 converting analog lpf to prototype analog low pass filter
+%computing a and b
+A=((-a1^2)+(al*au))/(a1*(au-al));
+ B=((a2^2)-(al*au))/(a2*(au-al)); wp1=1;
+ws1=min([A B]);
+disp('the normalised frequency wp''''is'); disp(wp1);
+disp('the normalised frequency ws'''' is'); disp(ws1);
+%step3 finding the order of the filter a=10^(-kp/10);
+b=10^(-ks/10);
+N=(log10((a-1)/(b-1)))/(2*log10(1/ws1)); N=ceil(abs(N));
+disp('the order of the filter is : '); disp(N);
+%STEP 4 converting prototype to desired [num,den]=butter(N,[al au],'bandpass','s');
+%step 5 finding the transfer function H=tf(num,den);
+disp('the transfer function is'); disp(H);
+%BILINEAR TRANSFORMATION
+[numz,denz]=bilinear(num,den,1);
+disp('The transfer function of the digital butterworth filter') hz=tf(numz,denz,-1);
+disp('tf after bilinear transformation'); disp(hz);
+t=0:0.01:pi;
+freqz(numz,denz,t);
+title('IIR Butterworth band Pass Filter using Bilinear Transformation');
+axis([0 1 -30 1]);
+%Finding and Plotting the poles and zeros of H(Z) disp('Poles and zeros of the digital filter') zeros_of_Digital_Filter=roots(numz); poles_of_Digital_Filter=roots(denz);
+figure; pzplot(hz);
+%To check whether the specifications are met
+disp('The passband and stopband of the designed digital filter') t=[wl wu w1 w2];
+h=freqz(numz,denz,t); gain=20*log10(abs(h)); disp(gain);
+
+IIR BAND STOP FILTER:
+clc; clear all; close all;
+c=input('enter your choice\n 1.inputs in hz, 2.analog in rad/s ,3 digital in radian/sample ');
+kp=input('enter the pass band ripple in db : '); ks=input('enter the stop band ripple in db : '); if(c==1)
+f1=input('enter the f1 value'); f2=input('enter the f2 value');
+fl=input('enter the lower limit frequency fl ; '); fu=input('enter the upper limit frequency fu : '); sf=input('enter the sampling frequency : '); w1=(2*pi*f1)/sf;
+ w2=(2*pi*f2)/sf; wl=(2*pi*fl)/sf; wu=(2*pi*fu)/sf; elseif(c==2)
+f1=input('enter the f1 value'); f2=input('enter the f2 value'); fl=input('enter fl ; '); fu=input('enter fu: ');
+sf=input('enter the sampling frequency : '); w1=(f1)/sf;
+ w2=(f2)/sf; wl=(fl)/sf; wu=(fu)/sf; else
+ w1=input('enter the w1 value'); w2=input('enter the w2 value'); wl=input('enter the wl value; '); wu=input('enter the wu value: '); end
+disp('the digital frequency wl is'); disp(wl);
+disp('the digital frequency wu is'); disp(wu);
+disp('the digital frequency w1 is'); disp(w1);
+disp('the digital frequency w2 is'); disp(w2);
+%step1 prewarping a1=2*tan(w1/2); a2=2*tan(w2/2);
+disp('the prewarped frequency w1 is'); disp(a1);
+disp('the prewarped frequency w2 is'); disp(a2);
+al=2*tan(wl/2); au=2*tan(wu/2);
+disp('the prewarped frequency wl is');
+
+disp(al);
+disp('the prewarped frequency wu is'); disp(au);
+%step 2 converting analog lpf to prototype analog low pass filter
+%computing a and b A=1/(((a1^2)+(al*au))/(a1*(au-al)));
+ B=1/(((-a2^2)+(al*au))/(a2*(au-al))); wp1=1;
+ws1=max([A B]);
+disp('the normalised frequency wp''''is'); disp(wp1);
+disp('the normalised frequency ws'''' is'); disp(ws1);
+%step3 finding the order of the filter a=10^(-kp/10);
+b=10^(-ks/10);
+N=(log10((a-1)/(b-1)))/(2*log10(1/ws1)); N=ceil(abs(N));
+disp('the order of the filter is : '); disp(N);
+%step 4 converting prototype to desired [num,den]=butter(N,[al au],'stop','s');
+%step 5 finding the transfer function H=tf(num,den);
+disp('the transfer function is'); disp(H);
+%BILINEAR TRANSFORMATION
+[numz,denz]=bilinear(num,den,1);
+disp('The transfer function of the digital butterworth filter') hz=tf(numz,denz,-1);
+disp('tf after bilinear transformation'); disp(hz);
+t=0:0.01:pi;
+freqz(numz,denz,t);
+title('IIR Butterworth band stop Filter using Bilinear Transformation');
+axis([0 1 -30 1]);
+%Finding and Plotting the poles and zeros of H(Z) disp('Poles and zeros of the digital filter') zeros_of_Digital_Filter=roots(numz); poles_of_Digital_Filter=roots(denz);
+figure; pzplot(hz);
+%To check whether the specifications are met
+disp('The passband and stopband of the designed digital filter') t=[wl wu w1 w2];
+h=freqz(numz,denz,t); gain=20*log10(abs(h)); disp(gain);
+
+CHEBYSHEV TYPE1 LOW PASS FILTER:
+clc; clear all; close all;
+c=input('enter your choice\n 1.inputs in hz, 2.analog in rad/s ,3 digital in radian/sample ');
+kp=input('enter the pass band ripple in db : '); ks=input('enter the stop band ripple in db : '); if(c==1)
+fp=input('enter the pass band frequency ; '); fs=input('enter the stop band frequency : '); sf=input('enter the sampling frequency : ') wp=(2*pi*fp)/sf;
+ ws=(2*pi*fs)/sf; elseif(c==2)
+fp=input('enter the pass band frequency ; '); fs=input('enter the stop band frequency : '); sf=input('enter the sampling frequency : ') wp=(fp)/sf;
+ ws=(fs)/sf; else
+ wp=input('enter the pass band digital frequency ; '); ws=input('enter the stop band digital frequency : '); end
+disp('the digital frequency wp is'); disp(wp);
+disp('the digital frequency ws is'); disp(ws);
+%step1 prewarping ap=2*tan(wp/2); as=2*tan(ws/2);
+disp('the prewarped frequency wp is'); disp(ap);
+disp('the prewarped frequency ws is'); disp(as);
+%step 2 converting analog lpf to prototype analog low pass filter
+wp1=1; ws1=as/ap;
+disp('the normalised frequency wp''''is'); disp(wp1);
+disp('the normalised frequency ws'''' is'); disp(ws1);
+%step3 finding the order of the filter e=((1/(10^(kp/10)))-1)^(1/2);
+A=(1/10^(ks/10))^(1/2); g=(((A^2)-1)/(e^2))^(1/2);
+
+N=(log10( (g+((g^2-1)^(1/2))) ))/(log10(ws1+((ws1^2- 1)^(1/2))));
+N=ceil(N);
+%step:4converting prototype filter into desired filter ch=input('enter 1 for favourable to pass band and enter 2 for favourable to stop band ":');
+if(ch==1) [num,den]=cheby1(N,1,wp,'low','s'); else [num,den]=cheby1(N,ws,1,'low','s'); end
+%step 5 finding the transfer function H=tf(num,den);
+disp('the transfer function is'); disp(H);
+%BILINEAR TRANSFORMATION
+[numz,denz]=bilinear(num,den,1);
+disp('The transfer function of the chebyshev filter') hz=tf(numz,denz,-1);
+disp('tf after bilinear transformation'); disp(hz);
+t=0:0.01:pi;
+freqz(numz,denz,t);
+title('chebyshev Low Pass Filter using Bilinear Transformation');
+axis([0 1 -30 1]);
+%Finding and Plotting the poles and zeros of H(Z) disp('Poles and zeros of the digital filter') zeros_of_Digital_Filter=roots(numz); poles_of_Digital_Filter=roots(denz);
+figure; pzplot(hz);
+%To check whether the specifications are met
+disp('The passband and stopband of the designed digital filter')
+t=[wp ws]; h=freqz(numz,denz,t); gain=20*log10(abs(h)); disp('gain');
+disp(gain);
+
+CHEBYSHEV TYPE1 HIGH PASS FILTER:
+clc; clear all; close all;
+c=input('enter your choice\n 1.inputs in hz, 2.analog in rad/s ,3 digital in radian/sample ');
+kp=input('enter the pass band ripple in db : '); ks=input('enter the stop band ripple in db : '); if(c==1)
+fp=input('enter the pass band frequency ; '); fs=input('enter the stop band frequency : '); sf=input('enter the sampling frequency : ') wp=(2*pi*fp)/sf;
+ ws=(2*pi*fs)/sf; elseif(c==2)
+fp=input('enter the pass band frequency ; '); fs=input('enter the stop band frequency : '); sf=input('enter the sampling frequency : ') wp=(fp)/sf;
+ ws=(fs)/sf; else
+ wp=input('enter the pass band digital frequency ; '); ws=input('enter the stop band digital frequency : '); end
+disp('the digital frequency wp is'); disp(wp);
+disp('the digital frequency ws is'); disp(ws);
+%step1 prewarping ap=2*tan(wp/2); as=2*tan(ws/2);
+disp('the prewarped frequency wp is'); disp(ap);
+disp('the prewarped frequency ws is'); disp(as);
+%step 2 converting analog lpf to prototype analog low pass filter
+wp1=1; ws1=ap/as;
+disp('the normalised frequency wp''''is'); disp(wp1);
+disp('the normalised frequency ws'''' is'); disp(ws1);
+%step3 finding the order of the filter e=((1/(10^(kp/10)))-1)^(1/2);
+A=(1/10^(ks/10))^(1/2); g=(((A^2)-1)/(e^2))^(1/2);
+
+N=(log10( (g+((g^2-1)^(1/2))) ))/(log10(ws1+((ws1^2- 1)^(1/2))));
+N=ceil(N);
+%step:4converting prototype filter into desired filter ch=input('enter 1 for favourable to pass band and enter 2 for favourable to stop band ":');
+if(ch==1) [num,den]=cheby1(N,1,wp,'high','s'); else [num,den]=cheby1(N,1,ws,'high','s'); end
+%step 5 finding the transfer function H=tf(num,den);
+disp('the transfer function is'); disp(H);
+%BILINEAR TRANSFORMATION
+[numz,denz]=bilinear(num,den,1);
+disp('The transfer function of the chebyshev filter') hz=tf(numz,denz,-1);
+disp('tf after bilinear transformation'); disp(hz);
+t=0:0.01:pi;
+freqz(numz,denz,t);
+title('chebyshev high Pass Filter using Bilinear Transformation');
+axis([0 1 -30 1]);
+%Finding and Plotting the poles and zeros of H(Z) disp('Poles and zeros of the digital filter') zeros_of_Digital_Filter=roots(numz); poles_of_Digital_Filter=roots(denz);
+figure; pzplot(hz);
+%To check whether the specifications are met
+disp('The passband and stopband of the designed digital filter')
+t=[wp ws]; h=freqz(numz,denz,t); gain=20*log10(abs(h)); disp('gain');
+disp(gain);
+
+FIR FLITER:
+clc; clear all; close all;
+ch= menu('Select the type of input specification:','direct using ? ','indirect using N','using
+transition bandwidth');
+%direct method using tow(a) if(ch==1)
+ filter=menu('SELECT THE TYPE OF FILTER','LPF','HPF','BPF','BSF');
+if(filter==1)
+a=input('Enter the value of the delay,a : '); Wc=input('Enter the value of the cut-off frequency'); N=(a*2)+1;
+disp('length of the IIR sequence'); disp(N);
+hd=[]; for i=1:N
+if((i-1)~=a)
+hd(i)=(sin(((i-1)-a)*Wc))/(pi*((i-1)-a)); else
+hd(a+1)=Wc/pi; end
+end
+disp('the IIR filter sequence is'); disp(hd);
+%high pass filter elseif(filter==2)
+a=input('Enter the value of the delay,a'); Wc=input('Enter the value of the cut-off frequency'); N=(a*2)+1;
+disp('length of the IIR sequence'); disp(N);
+hd=[]; for i=1:N
+if((i-1)~=a)
+hd(i)= (sin(pi*((i-1)-a))-sin(Wc*((i-1)-a)))/(pi*((i-1)-a)); else
+hd(a+1)=1-(Wc/pi); end
+end
+disp('the IIR filter sequence is'); disp(hd);
+%band pass filter elseif(filter==3)
+a=input('Enter the value of the delay,a'); Wc1=input('Enter the value of the cut-off frequency');
+
+Wc2=input('Enter the value of the cut-off frequency'); N=(a*2)+1;
+disp('length of the IIR sequence'); disp(N);
+hd=[]; for i=1:N
+if((i-1)~=a)
+hd(i)=(sin(Wc2*((i-1)-a))-sin(Wc1*((i-1)-a)))/(pi*((i-1)-a)); else
+hd(a+1)=(Wc2-Wc1)/pi; end
+end
+disp('the IIR filter sequence is'); disp(hd);
+%band stop filter else
+a=input('Enter the value of the delay,a'); Wc1=input('Enter the value of the cut-off frequency'); Wc2=input('Enter the value of the cut-off frequency'); N=(a*2)+1;
+disp('length of the IIR sequence'); disp(N);
+hd=[]; for i=1:N
+if((i-1)~=a)
+ hd(i)=(sin(Wc1*((i-1)-a))-sin(Wc2*((i-1)-a))+sin(pi*((i-1)- a)))/(pi*((i-1)-a));
+else
+hd(a+1)=1+((Wc2-Wc1)/pi); end
+end
+disp('the IIR filter sequence is'); disp(hd);
+end
+%window function: window=menu('choose A SUITABLE
+WINDOW','RECTANGULAR','HANNING','HAMMING','BLA CKMAN');
+%rectangular window if (window ==1) wn=[];
+for i=1:N wn(i)=1; end disp(wn); HD=hd.*wn; w=0:0.01:pi;
+figure(1);
+
+freqz(HD,1,w); figure(2); pzplot(tf(HD,-1)); disp(HD);
+%hanning window elseif (window ==2) wn=[];
+for i=1:N
+wn(i)=(1-cos((2*pi*(i-1))/(N-1))); end
+disp(wn); HD=hd.*wn; w=0:0.01:pi;
+figure(1); freqz(HD,1,w); figure(2); pzplot(tf(HD,-1)); disp(HD);
+%hamming window elseif (window ==3) wn=[];
+for i=1:N
+wn(i)=0.54-0.46*(cos((2*pi*(i-1))/(N-1))); end
+disp(wn); HD=hd.*wn; w=0:0.01:pi;
+figure(1); freqz(HD,1,w); figure(2); pzplot(tf(HD,-1)); disp(HD);
+%blackman window elseif (window ==4) wn=[];
+for i=1:N
+ wn(i)=0.48-(0.5*cos((2*pi*(i-1))/(N-1)))+0.08*(cos((4*pi*(i- 1))/(N-1)));
+end disp(wn); HD=hd.*wn; w=0:0.01:pi;
+figure(1); freqz(HD,1,w); figure(2); pzplot(tf(HD,-1)); disp(HD);
+end %end of window function choice
+
+%end of choice one
+ %choice 2 elseif(ch==2)
+ filter=menu('SELECT THE TYPE OF FILTER','LPF','HPF','BPF','BSF');
+if(filter==1)
+N=input('Enter the value N value');
+Wc=input('Enter the value of the cut-off frequency'); a=(N-1)/2;
+disp('length of the IIR sequence'); disp(N);
+hd=[]; for i=1:N
+if((i-1)~=a)
+hd(i)=(sin(((i-1)-a)*Wc))/(pi*((i-1)-a)); else
+hd(a+1)=Wc/pi; end
+end
+disp('the IIR filter sequence is'); disp(hd);
+%high pass filter elseif(filter==2)
+N=input('Enter the value N value');
+Wc=input('Enter the value of the cut-off frequency'); a=(N-1)/2;
+disp('length of the IIR sequence'); disp(N);
+hd=[]; for i=1:N
+if((i-1)~=a)
+hd(i)= (sin(pi*((i-1)-a))-sin(Wc*((i-1)-a)))/(pi*((i-1)-a)); else
+hd(a+1)=1-(Wc/pi); end
+end
+disp('the IIR filter sequence is'); disp(hd);
+%band pass filter elseif(filter==3)
+N=input('Enter the value N value'); a=(N-1)/2;
+Wc1=input('Enter the value of the cut-off frequency'); Wc2=input('Enter the value of the cut-off frequency'); disp('length of the IIR sequence');
+disp(N);
+hd=[]; for i=1:N
+
+if((i-1)~=a)
+hd(i)=(sin(Wc2*((i-1)-a))-sin(Wc1*((i-1)-a)))/(pi*((i-1)-a)); else
+hd(a+1)=(Wc2-Wc1)/pi; end
+end
+disp('the IIR filter sequence is'); disp(hd);
+%band stop filter else
+N=input('Enter the value N value'); a=(N-1)/2;
+Wc1=input('Enter the value of the cut-off frequency'); Wc2=input('Enter the value of the cut-off frequency'); disp('length of the IIR sequence');
+disp(N);
+hd=[]; for i=1:N
+if((i-1)~=a)
+ hd(i)=(sin(Wc1*((i-1)-a))-sin(Wc2*((i-1)-a))+sin(pi*((i-1)- a)))/(pi*((i-1)-a));
+else
+hd(a+1)=1+((Wc2-Wc1)/pi); end
+end
+disp('the IIR filter sequence is'); disp(hd);
+end
+%window function: window=menu('choose A SUITABLE
+WINDOW','RECTANGULAR','HANNING','HAMMING','BLA CKMAN');
+%rectangular window if (window ==1) wn=[];
+for i=1:N wn(i)=1; end disp(wn); HD=hd.*wn; w=0:0.01:pi;
+figure(1); freqz(HD,1,w); figure(2); pzplot(tf(HD,-1)); disp(HD);
+%hanning window elseif (window ==2)
+
+wn=[]; for i=1:N
+wn(i)=(1-cos((2*pi*(i-1))/(N-1))); end
+disp(wn); HD=hd.*wn; w=0:0.01:pi;
+figure(1); freqz(HD,1,w); figure(2); pzplot(tf(HD,-1)); disp(HD);
+%hamming window elseif (window ==3) wn=[];
+for i=1:N
+wn(i)=0.54-0.46*(cos((2*pi*(i-1))/(N-1))); end
+disp(wn); HD=hd.*wn; w=0:0.01:pi;
+figure(1); freqz(HD,1,w); figure(2); pzplot(tf(HD,-1)); disp(HD);
+%blackman window elseif (window ==4) wn=[];
+for i=1:N
+ wn(i)=0.48-(0.5*cos((2*pi*(i-1))/(N-1)))+0.08*(cos((4*pi*(i- 1))/(N-1)));
+end disp(wn); HD=hd.*wn; w=0:0.01:pi;
+figure(1); freqz(HD,1,w); figure(2); pzplot(tf(HD,-1)); disp(HD);
+end %end of window function choice
+%end of choice 2
+ %choice 3:using transition bandwidth: else
+ filter=menu('SELECT THE TYPE OF FILTER','LPF','HPF','BPF','BSF');
+if(filter==1)
+
+wp=input('enter pass band frequency : '); ws=input('enter the stop band frequency'); kp=input('enter the pass band gain: '); ks=input('enter the stop band frequency : '); Wc=input('Enter the value of the cut-off frequency'); if(ks>-44)
+d=4*pi; window=1; elseif(ks>-53) d=8*pi; window=2; elseif(ks>=-74) d=8*pi; window=3; else
+d=12*pi; window=4; end
+N=abs(floor(d/(wp-ws))); disp('length of the IIR sequence'); disp(N);
+a=(N-1)/2;
+hd=[]; for i=1:N
+if((i-1)~=a)
+hd(i)=(sin(((i-1)-a)*Wc))/(pi*((i-1)-a)); else
+hd(a+1)=Wc/pi; end
+end
+disp('the IIR filter sequence is'); disp(hd);
+%high pass filter elseif(filter==2)
+wp=input('enter pass band frequency : '); ws=input('enter the stop band frequency'); kp=input('enter the pass band gain: '); ks=input('enter the stop band frequency : '); Wc=input('Enter the value of the cut-off frequency'); if(ks>-44)
+d=4*pi; window=1; elseif(ks>-53) d=8*pi; window=2; elseif(ks>=-74) d=8*pi; window=3;
+
+else d=12*pi; window=4; end
+N=abs(floor(d/(wp-ws))); disp(N);
+a=(N-1)/2;
+hd=[]; for i=1:N
+if((i-1)~=a)
+hd(i)= (sin(pi*((i-1)-a))-sin(Wc*((i-1)-a)))/(pi*((i-1)-a)); else
+hd(a+1)=1-(Wc/pi); end
+end
+disp('the IIR filter sequence is'); disp(hd);
+%band pass filter elseif(filter==3)
+wp=input('enter pass band frequency : '); ws=input('enter the stop band frequency'); kp=input('enter the pass band gain: '); ks=input('enter the stop band frequency : '); Wc1=input('Enter the value of the cut-off frequency'); Wc2=input('Enter the value of the cut-off frequency'); if(ks>-44)
+d=4*pi; window=1; elseif(ks>-53) d=8*pi; window=2; elseif(ks>=-74) d=8*pi; window=3; else
+d=12*pi; window=4; end
+N=abs(floor(d/(wp-ws))); disp('length of the IIR sequence'); disp(N);
+a=(N-1)/2;
+hd=[]; for i=1:N
+if((i-1)~=a)
+hd(i)=(sin(Wc2*((i-1)-a))-sin(Wc1*((i-1)-a)))/(pi*((i-1)-a)); else
+hd(a+1)=(Wc2-Wc1)/pi;
+
+end end
+disp('the IIR filter sequence is'); disp(hd);
+%band stop filter else
+wp=input('enter pass band frequency : '); ws=input('enter the stop band frequency'); kp=input('enter the pass band gain: '); ks=input('enter the stop band frequency : '); Wc1=input('Enter the value of the cut-off frequency'); Wc2=input('Enter the value of the cut-off frequency'); if(ks>-44)
+d=4*pi; window=1; elseif(ks>-53) d=8*pi; window=2; elseif(ks>=-74) d=8*pi; window=3; else
+d=12*pi; window=4; end
+N=abs((floor(d/(wp-ws)))); disp('length of the IIR sequence'); disp(N);
+a=(N-1)/2;
+hd=[]; for i=1:N
+if((i-1)~=a)
+ hd(i)=(sin(Wc1*((i-1)-a))-sin(Wc2*((i-1)-a))+sin(pi*((i-1)- a)))/(pi*((i-1)-a));
+else
+hd(a+1)=1+((Wc2-Wc1)/pi); end
+end
+disp('the IIR filter sequence is'); disp(hd);
+end
+%choosing window function
+ % window=menu('choose A SUITABLE WINDOW','RECTANGULAR','HANNING','HAMMING','BLA CKMAN');
+%rectangular window if (window ==1) wn=[];
+
+for i=1:N wn(i)=1; end disp(wn); HD=hd.*wn; w=0:0.01:pi;
+figure(1); freqz(HD,1,w); figure(2); pzplot(tf(HD,-1)); disp(HD);
+%hanning window elseif (window ==2) wn=[];
+for i=1:N
+wn(i)=(1-cos((2*pi*(i-1))/(N-1))); end
+disp(wn); HD=hd.*wn; w=0:0.01:pi;
+figure(1); freqz(HD,1,w); figure(2); pzplot(tf(HD,-1)); disp(HD);
+%hamming window elseif (window ==3) wn=[];
+for i=1:N
+wn(i)=0.54-0.46*(cos((2*pi*(i-1))/(N-1))); end
+disp(wn); HD=hd.*wn; w=0:0.01:pi;
+figure(1); freqz(HD,1,w); figure(2); pzplot(tf(HD,-1)); disp(HD);
+%blackman window elseif (window ==4) wn=[];
+for i=1:N
+ wn(i)=0.48-(0.5*cos((2*pi*(i-1))/(N-1)))+0.08*(cos((4*pi*(i- 1))/(N-1)));
+end disp(wn); HD=hd.*wn;
+
+w=0:0.01:pi;
+figure(1); freqz(HD,1,w); figure(2); pzplot(tf(HD,-1)); disp(HD);
+end %end of window function choice
+ %end of choice one end
+
+FINITE WORD LENGTH EFFECT:
+clc; clear all; close all;
+num=input('Enter the numerator coefficients in [] : ');
+%getting the numerator
+den=input('Enter the denominator coefficients in [] : ');%getting the denominator
+bit=input('Enter the no of bits for quantization : '); bit
+H= tf(num,den,0.1,'Variable','z^-1'); disp('The given input iir filter response'); H
+subplot(221); pzplot(H);
+title('original filter response');
+disp('zeros and poles of original filter response'); zeros=roots(num)
+poles=roots(den) num1=[];
+den1=[]; y=[];m=1;c=0;
+%truncation method
+%finding the quantized numerator for i=1:length(num)
+in=num(i); if(in<0) c=i; in=abs(in); end
+decpart = dec2bin(floor(in)); in = in-floor(in);
+n = -1;
+floatpart = [];
+while in~=0 || in>eps if in - 2^n < 0
+floatpart = [floatpart '0']; else
+floatpart = [floatpart '1']; in = in - 2^n;
+end
+ n = n - 1; end
+bin = [decpart '.' floatpart]; bin=num2str(bin); if(length(bin)>(bit+2)) bin=bin(1:bit+2);
+end
+
+bin=num2str(bin); bin=num2str(bin); ind = find(bin == '.');
+decpart = bin(1:ind-1); floatpart = bin(ind+1:end); out = bin2dec(decpart); for n = 1:length(floatpart) if floatpart(n) == '1'
+out = out + 2^(-n); end
+end if(i==c)
+num1(i)=out*-1; else num1(i)=out; end
+end
+%quantization using truncation method of the denominator for i=1:length(den)
+in=den(i); if(in<0) c=i; in=abs(in); end
+decpart = dec2bin(floor(in)); in = in-floor(in);
+n = -1;
+floatpart = [];
+while in~=0 || in>eps if in - 2^n < 0
+floatpart = [floatpart '0']; else
+floatpart = [floatpart '1']; in = in - 2^n;
+end
+ n = n - 1; end
+bin = [decpart '.' floatpart]; bin=num2str(bin); if(length(bin)>(bit+2)) bin=bin(1:bit+2);
+end bin=num2str(bin); bin=num2str(bin); ind = find(bin == '.');
+decpart = bin(1:ind-1); floatpart = bin(ind+1:end); out = bin2dec(decpart);
+
+for n = 1:length(floatpart) if floatpart(n) == '1'
+out = out + 2^(-n); end
+end if(i==c)
+den1(i)=out*-1; else den1(i)=out; end
+end
+HQ= tf(num1,den1,0.1,'Variable','z^-1'); subplot(222);
+pzplot(HQ);
+title('filter response after quantization using truncation method');
+disp('Filter response after quantization using truncation method');
+HQ
+disp('zeros and poles of filter response by truncation quantization');
+zeros=roots(num1) poles=roots(den1) num2=[];
+den2=[];
+%quantization by rounding
+%numerator quantization for i=1:length(num) in=num(i);
+c=0;
+if(in<0) c=i; in=abs(in); end
+decpart = dec2bin(floor(in)); in = in-floor(in);
+n = -1;
+floatpart = [];
+while in~=0 || in>eps if in - 2^n < 0
+floatpart = [floatpart '0']; else
+floatpart = [floatpart '1']; in = in - 2^n;
+end
+ n = n - 1; end
+bin = [decpart '.' floatpart];
+
+bin=num2str(bin); if(length(bin)>(bit+2)) if(bin(bit+3)=='1')
+if(bin(bit+2)=='1')
+bin(bit+2)='0';
+if(bin(bit+1)=='1')
+bin(bit+1)='0';
+if(bin(bit)=='1')
+bin(bit)='0'; else if(bin(bit)~='.')
+bin(bit)='1'; end
+end else
+if(bin(bit+1)~='.')
+bin(bit+1)='1'; end
+end else
+if(bin(bit+1)~='.')
+bin(bit+2)='1'; end
+end end
+
+ bin=bin(1:bit+2); end bin=num2str(bin); bin=num2str(bin); ind = find(bin == '.');
+decpart = bin(1:ind-1); floatpart = bin(ind+1:end); out = bin2dec(decpart); for n = 1:length(floatpart) if floatpart(n) == '1'
+out = out + 2^(-n); end
+end if(i==c)
+num2(i)=out*-1; else num2(i)=out; end
+end
+%denominator quantization for i=1:length(num) in=den(i);
+
+if(in<0) c=i; in=abs(in); end
+decpart = dec2bin(floor(in)); in = in-floor(in);
+n = -1;
+floatpart = [];
+while in~=0 || in>eps if in - 2^n < 0
+floatpart = [floatpart '0']; else
+floatpart = [floatpart '1']; in = in - 2^n;
+end
+ n = n - 1; end
+bin = [decpart '.' floatpart]; bin=num2str(bin); if(length(bin)>(bit+2)) if(bin(bit+3)=='1')
+if(bin(bit+2)=='1')
+bin(bit+2)='0';
+if(bin(bit+1)=='1')
+bin(bit+1)='0';
+if(bin(bit)=='1')
+bin(bit)='0'; else if(bin(bit)~='.')
+bin(bit)='1'; end
+end else
+if(bin(bit+1)~='.')
+bin(bit+1)='1'; end
+end else
+if(bin(bit+1)~='.')
+bin(bit+2)='1'; end
+end end
+
+ bin=bin(1:bit+2); end bin=num2str(bin); ind = find(bin == '.');
+
+decpart = bin(1:ind-1); floatpart = bin(ind+1:end); out = bin2dec(decpart); for n = 1:length(floatpart) if floatpart(n) == '1'
+out = out + 2^(-n); end
+end if(i==c)
+den2(i)=out*-1; else den2(i)=out; end
+end
+HQR= tf(num2,den2,0.1,'Variable','z^-1');
+disp('Filter response after quantization using rounding method');
+HQR
+subplot(223); pzplot(HQR);
+title('filter response after quantization using rounding method');
+disp('zeros and poles of filter response by rounding method');
+zeros=roots(num2) poles=roots(den2)
